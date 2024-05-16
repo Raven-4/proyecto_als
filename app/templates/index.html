@@ -1,4 +1,54 @@
-{% extends 'base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Music App</title>
+</head>
+<body>
+    <h1>My Music App</h1>
+
+    <!-- Mostrar Canciones -->
+    <h2>Canciones Disponibles:</h2>
+    <ul>
+        {% for song in songs %}
+            <li>{{ song.title }} - {{ song.artist }} ({{ song.genre }})</li>
+        {% endfor %}
+    </ul>
+
+    <!-- Formulario para Agregar Canciones -->
+    <h2>Agregar Nueva Canción:</h2>
+    <form action="/add_song" method="POST">
+        <label for="title">Título:</label>
+        <input type="text" id="title" name="title" required><br>
+        
+        <label for="artist">Artista:</label>
+        <input type="text" id="artist" name="artist" required><br>
+        
+        <label for="genre">Género:</label>
+        <input type="text" id="genre" name="genre" required><br>
+        
+        <button type="submit">Agregar Canción</button>
+    </form>
+
+    <!-- Formulario de Inicio de Sesión -->
+    {% if not usr %}
+        <h2>Iniciar Sesión:</h2>
+        <form action="/login" method="POST">
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required><br>
+            
+            <label for="password">Contraseña:</label>
+            <input type="password" id="password" name="password" required><br>
+            
+            <button type="submit">Iniciar Sesión</button>
+        </form>
+    {% endif %}
+</body>
+</html>
+
+
+<!-- {% extends 'base.html' %}
 
 {% block content %}
 <h2>Canciones</h2>
@@ -7,4 +57,4 @@
         <li>{{ song.title }} - {{ song.artist }} ({{ song.genre }})</li>
     {% endfor %}
 </ul>
-{% endblock %}
+{% endblock %} -->

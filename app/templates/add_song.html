@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+<!-- {% extends 'base.html' %}
 
 {% block content %}
 <h2>Agregar Canción</h2>
@@ -9,4 +9,28 @@
     <p>{{ form.genre.label }}<br>{{ form.genre }}</p>
     <p>{{ form.submit() }}</p>
 </form>
-{% endblock %}
+{% endblock %} -->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Song</title>
+</head>
+
+<body>
+    <h1>Add Song</h1>
+    <form method="POST" action="/add_song">
+        <label for="title">Title:</label><br>
+        <input type="text" id="title" name="title" required><br>
+        <label for="artist">Artist:</label><br>
+        <input type="text" id="artist" name="artist" required><br>
+        <label for="genre">Genre:</label><br>
+        <input type="text" id="genre" name="genre" required><br><br>
+        <input type="submit" value="Add Song">
+    </form>
+</body>
+
+</html>
