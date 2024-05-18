@@ -3,13 +3,18 @@ import flask_login
 import werkzeug.security as safe
 
 class User(flask_login.UserMixin):
-    def __init__(self, email, password):
+    def __init__(self, email, username, password):
         self._email = email
+        self._username = username
         self._password = safe.generate_password_hash(password)
 
     @property
     def email(self):
         return self._email
+    
+    @property
+    def username(self):
+        return self._username
     
     def get_id(self):
         return self.email
@@ -30,3 +35,7 @@ class User(flask_login.UserMixin):
     @staticmethod
     def find(s: sirope.Sirope, email: str) -> "User":
         return s.find_first(User, lambda u: u.email == email)
+    
+    @staticmethod
+    def find_by_username(s: sirope.Sirope, username: str) -> "User":
+        return s.find_first(User, lambda u: u.username == username)
