@@ -16,12 +16,21 @@ class User(flask_login.UserMixin):
     def username(self):
         return self._username
     
+    @property
+    def oids_messages(self):
+        if not self.__dict__.get("_messages_oids"):
+            self._messages_oids = []
+        return self._messages_oids
+
     def get_id(self):
-        return self.email
+        return self.username
     
     def chk_password(self, pswd):
         return safe.check_password_hash(self._password, pswd)
-    
+
+    def add_message_oid(self, message_oid):
+        self.oids_messages.append(message_oid)
+
     @staticmethod
     def current_user():
         usr = flask_login.current_user

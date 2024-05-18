@@ -5,6 +5,7 @@ import flask_login
 from flask import render_template, redirect, url_for, request
 from models.song import Song
 from models.user import User
+from models.MessageDto import MessageDto
 
 def create_app():
     lmanager = flask_login.LoginManager()
@@ -13,7 +14,7 @@ def create_app():
 
     fapp.config.from_file("instance/config.json", load=json.load)
     lmanager.init_app(fapp)
-    lmanager.login_view = 'index'  # Redirect to index if unauthorized
+    lmanager.login_view = 'index' 
     return fapp, lmanager, sirp
 
 app, lm, srp = create_app()
@@ -32,9 +33,9 @@ def index():
     usr = User.current_user()
 
     if not usr:
-        return render_template("index.html", usr=usr)
+        return render_template("index.html")
     else:
-        return redirect(url_for("show_songs"))
+        return redirect(url_for("show_songs", usr=usr))
 
 @app.route("/show_songs")
 def show_songs():
@@ -50,6 +51,8 @@ def show_songs():
 
 @app.route("/add_song", methods=["POST"])
 def add_song():
+    usr = User.current_user()
+
     if request.method == "POST":
         title = request.form.get("title")
         artist = request.form.get("artist")
@@ -72,7 +75,7 @@ def add_song():
 
         return flask.redirect(url_for("index"))
     
-    return render_template("add_song.html")
+    return render_template("add_song.html", usr=usr)
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -97,14 +100,17 @@ def login():
         flask.flash("Credenciales inválidas")
         return flask.redirect(url_for("index"))
 
-@app.route("/logout")
+@app.route("/logout", methods=["GET", "POST"])
 @flask_login.login_required
 def logout():
-    flask_login.logout_user()
-    flask.flash("Sesión cerrada exitosamente")
-    return flask.redirect(url_for("index"))
+    if request.method == "POST":
+        flask_login.logout_user()
+        flask.flash("Sesión cerrada exitosamente")
+        return flask.redirect(url_for("index"))
+    else:
+        return flask.redirect(url_for("index"))
 
-@app.route("/register", methods=["GET", "POST"])
+@app.route("/register", methods=["POST"])
 def register():
     if request.method == "POST":
         email = request.form.get("email")
@@ -140,6 +146,42 @@ def register():
         return flask.redirect(url_for("index"))
     
     return render_template("register.html")
+
+@app.route("/save_message", methods=["POST"])
+def save_message():
+    message_txt = flask.request.form.get("edMessage")
+    email_txt = flask.request.form.get("edEmail")
+    password_txt = flask.request.form.get("edPassword")
+    
+    if not message_txt:
+        flask.flash("¿Y el mensaje?")
+        return flask.redirect("/")
+    
+    if not email_txt:
+        usr = User.current_user()
+        if not usr:
+            flask.flash("¡Debes iniciar sesión primero!")
+            return flask.redirect("/")
+    else:
+        usr = User.find(srp, email_txt)
+    
+    if not password_txt:
+        flask.flash("¿Y la contraseña?")
+        return flask.redirect("/")
+    
+    if not usr:
+        usr = User(email_txt, password_txt)
+        srp.save(usr)
+    elif not usr.chk_password(password_txt):
+        flask.flash("Las contraseñas no coinciden")
+        return flask.redirect("/")
+    
+    flask_login.login_user(usr)
+    msg_oid = srp.save(MessageDto(f"'{usr.email} dice: {message_txt}'"))
+    usr.add_message_oid(msg_oid)
+    srp.save(usr)
+    
+    return flask.redirect("/")
 
 if __name__ == "__main__":
     app.run(debug=True)

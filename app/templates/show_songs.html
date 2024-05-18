@@ -1,22 +1,15 @@
-<!DOCTYPE html>
-<html lang="es">
+{% extends "esqueleto.html" %}
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Music App - Canciones</title>
-</head>
+{% block title %}My Music App - Canciones{% endblock %}
 
-<body>
-    <h1>My Music App</h1>
-
-    <!-- Mostrar Canciones -->
-    <h2>Canciones Disponibles:</h2>
-    <ul>
-        {% for song in songs %}
-        <li>{{ song.title }} - {{ song.artist }} ({{ song.genre }})</li>
-        {% endfor %}
-    </ul>
-</body>
-
-</html>
+{% block content %}
+<h2>Canciones Disponibles:</h2>
+<ul>
+    {% for song in songs %}
+    <li>{{ song.title }} - {{ song.artist }} ({{ song.genre }})</li>
+    {% endfor %}
+</ul>
+<a href="{{ url_for('add_song') }}">
+    <button>Añadir Canciones</button>
+</a>
+{% endblock %}
