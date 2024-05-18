@@ -9,6 +9,7 @@ class User(flask_login.UserMixin):
         self._password = safe.generate_password_hash(password)
         self._songs_oids = []
         self.friends = []
+        self._friend_requests = []
 
     @property
     def email(self):
@@ -24,6 +25,9 @@ class User(flask_login.UserMixin):
             self._songs_oids = []
         return self._songs_oids
 
+    def friend_requests(self):
+        return self._friend_requests
+
     def get_id(self):
         return self.username
     
@@ -35,6 +39,9 @@ class User(flask_login.UserMixin):
         
     def add_friend(self, friend_username):
         self.friends.append(friend_username)
+
+    def add_friend_request(self, friend_request):
+        self._friend_requests.append(friend_request)
 
     @staticmethod
     def current_user():

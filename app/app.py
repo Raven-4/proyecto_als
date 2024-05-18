@@ -8,6 +8,7 @@ from model.song import Song
 from model.user import User
 import views.users.users_view as user_view
 import views.songs.song_views as song_view
+import views.account.account_view as account_view
 
 def create_app():
     lmanager = flask_login.LoginManager()
@@ -19,6 +20,7 @@ def create_app():
     lmanager.login_view = 'index' 
     fapp.register_blueprint(user_view.user_bp, url_prefix="/users")
     fapp.register_blueprint(song_view.song_bp, url_prefix="/songs")
+    fapp.register_blueprint(account_view.account_bp, url_prefix="/account")
     return fapp, lmanager, sirp
 
 app, lm, srp = create_app()
