@@ -13,4 +13,7 @@
         <form action="{{ url_for('users.add_friend', username=user.username) }}" method="POST" style="display:inline;">
             <button type="submit">Enviar Solicitud de Amistad</button>
         </form>
-    </li
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

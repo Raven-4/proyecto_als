@@ -9,7 +9,9 @@
     <li>{{ song.title }} - {{ song.artist }} ({{ song.genre }})</li>
     {% endfor %}
 </ul>
-<a href="{{ url_for('add_song') }}">
+<a href="{{ url_for('users.users') }}">Ver usuarios</a>
+<br>
+<a href="{{ url_for('songs.add_song') }}">
     <button>Añadir Canciones</button>
 </a>
 {% endblock %}

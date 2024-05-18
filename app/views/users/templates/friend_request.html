@@ -1,0 +1,19 @@
+{% extends "esqueleto.html" %}
+
+{% block title %}My Music App - Solicitudes de Amistad{% endblock %}
+
+{% block content %}
+<h2>Solicitudes de Amistad Pendientes:</h2>
+<ul>
+    {% for request in friend_requests %}
+    <li>{{ request.sender.username }} quiere ser tu amigo
+        <form action="{{ url_for('users.accept_friend_request', request_id=request.id) }}" method="POST" style="display:inline;">
+            <button type="submit">Aceptar</button>
+        </form>
+        <form action="{{ url_for('users.reject_friend_request', request_id=request.id) }}" method="POST" style="display:inline;">
+            <button type="submit">Rechazar</button>
+        </form>
+    </li>
+    {% endfor %}
+</ul>
+{% endblock %}

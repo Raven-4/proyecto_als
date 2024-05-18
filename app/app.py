@@ -3,19 +3,22 @@ import flask
 import sirope
 import flask_login
 from flask import render_template, redirect, url_for, request
+
 from model.song import Song
 from model.user import User
 import views.users.users_view as user_view
+import views.songs.song_views as song_view
 
 def create_app():
     lmanager = flask_login.LoginManager()
-    fapp = flask.Flask(__name__, instance_relative_config=True)
+    fapp = flask.Flask(__name__)
     sirp = sirope.Sirope()
 
     fapp.config.from_file("instance/config.json", load=json.load)
     lmanager.init_app(fapp)
     lmanager.login_view = 'index' 
-    fapp.register_blueprint(user_view.user_bp)
+    fapp.register_blueprint(user_view.user_bp, url_prefix="/users")
+    fapp.register_blueprint(song_view.song_bp, url_prefix="/songs")
     return fapp, lmanager, sirp
 
 app, lm, srp = create_app()
@@ -36,50 +39,7 @@ def index():
     if not usr:
         return render_template("index.html")
     else:
-        return redirect(url_for("show_songs", usr=usr))
-
-@app.route("/show_songs")
-def show_songs():
-    usr = User.current_user()
-    songs = list(srp.load_all(Song))
-
-    sust = {
-        "usr": usr,
-        "songs": songs
-    }
-
-    return render_template("show_songs.html", **sust)
-
-@app.route("/add_song", methods=["GET", "POST"])
-def add_song():
-    usr = User.current_user()
-
-    if request.method == "POST":
-        title = request.form.get("title")
-        artist = request.form.get("artist")
-        genre = request.form.get("genre")
-        
-        if not title:
-            flask.flash("¿Y el título?")
-            return flask.redirect(url_for("add_song"))
-        
-        if not artist:
-            flask.flash("¿Y el artista?")
-            return flask.redirect(url_for("add_song"))
-        
-        if not genre:
-            flask.flash("¿Y el género?")
-            return flask.redirect(url_for("add_song"))
-        
-        song = Song(title=title, artist=artist, genre=genre)
-        song_oid = srp.save(song)
-
-        usr.add_song_oid(song_oid)  
-        srp.save(usr)
-
-        return flask.redirect(url_for("show_songs"))
-    
-    return render_template("add_song.html", usr=usr)
+        return redirect(url_for("songs.show_songs"))
 
 @app.route("/login", methods=["POST"])
 def login():
@@ -99,7 +59,7 @@ def login():
     if user and user.chk_password(password):
         flask_login.login_user(user)
         flask.flash("Inicio de sesión exitoso")
-        return flask.redirect(url_for("show_songs"))
+        return flask.redirect(url_for("songs.show_songs"))
     else:
         flask.flash("Credenciales inválidas")
         return flask.redirect(url_for("index"))
@@ -150,42 +110,6 @@ def register():
         return flask.redirect(url_for("index"))
     
     return render_template("register.html")
-
-# @app.route("/save_message", methods=["POST"])
-# def save_message():
-#     message_txt = flask.request.form.get("edMessage")
-#     email_txt = flask.request.form.get("edEmail")
-#     password_txt = flask.request.form.get("edPassword")
-    
-#     if not message_txt:
-#         flask.flash("¿Y el mensaje?")
-#         return flask.redirect("/")
-    
-#     if not email_txt:
-#         usr = User.current_user()
-#         if not usr:
-#             flask.flash("¡Debes iniciar sesión primero!")
-#             return flask.redirect("/")
-#     else:
-#         usr = User.find(srp, email_txt)
-    
-#     if not password_txt:
-#         flask.flash("¿Y la contraseña?")
-#         return flask.redirect("/")
-    
-#     if not usr:
-#         usr = User(email_txt, password_txt)
-#         srp.save(usr)
-#     elif not usr.chk_password(password_txt):
-#         flask.flash("Las contraseñas no coinciden")
-#         return flask.redirect("/")
-    
-#     flask_login.login_user(usr)
-#     msg_oid = srp.save(MessageDto(f"'{usr.email} dice: {message_txt}'"))
-#     usr.add_message_oid(msg_oid)
-#     srp.save(usr)
-    
-#     return flask.redirect("/")
 
 if __name__ == "__main__":
     app.run(debug=True)

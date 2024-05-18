@@ -4,7 +4,7 @@
 
 {% block content %}
 <h2>Agregar Nueva Canción:</h2>
-<form action="/add_song" method="POST">
+<form action="/songs/add_song" method="POST">
     <label for="title">Título:</label>
     <input type="text" id="title" name="title" required><br>
 
@@ -16,7 +16,7 @@
 
     <button type="submit">Agregar Canción</button>
 </form>
-<a href="{{ url_for('show_songs') }}">
+<a href="{{ url_for('songs.show_songs') }}">
     <button>Atrás</button>
 </a>
 
