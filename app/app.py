@@ -3,9 +3,9 @@ import flask
 import sirope
 import flask_login
 from flask import render_template, redirect, url_for, request
-from models.song import Song
-from models.user import User
-from models.MessageDto import MessageDto
+from model.song import Song
+from model.user import User
+from model.MessageDto import MessageDto
 
 def create_app():
     lmanager = flask_login.LoginManager()
@@ -49,7 +49,7 @@ def show_songs():
 
     return render_template("show_songs.html", **sust)
 
-@app.route("/add_song", methods=["POST"])
+@app.route("/add_song", methods=["GET", "POST"])
 def add_song():
     usr = User.current_user()
 
@@ -73,7 +73,7 @@ def add_song():
         song = Song(title=title, artist=artist, genre=genre)
         srp.save(song)
 
-        return flask.redirect(url_for("index"))
+        return flask.redirect(url_for("show_songs"))
     
     return render_template("add_song.html", usr=usr)
 
@@ -110,7 +110,7 @@ def logout():
     else:
         return flask.redirect(url_for("index"))
 
-@app.route("/register", methods=["POST"])
+@app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
         email = request.form.get("email")
