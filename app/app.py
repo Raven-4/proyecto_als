@@ -32,44 +32,68 @@ def index():
     usr = User.current_user()
     songs = srp.load_all(Song)
 
+    if not usr:
+        return render_template("index.html", usr=usr)
+
     sust = {
         "usr": usr,
         "songs": songs
     }
 
-    return render_template("index.html", **sust)
+    return render_template("show_songs.html", **sust)
 
 @app.route("/add_song", methods=["POST"])
 def add_song():
-    title = flask.request.form.get("title")
-    artist = flask.request.form.get("artist")
-    genre = flask.request.form.get("genre")
-    
-    if not title:
-        flask.flash("¿Y el título?")
-        return flask.redirect("/")
-    
-    if not artist:
-        flask.flash("¿Y el artista?")
-        return flask.redirect("/")
-    
-    if not genre:
-        flask.flash("¿Y el género?")
-        return flask.redirect("/")
-    
-    # Create a new Song instance (you need to define the Song class)
-    song = Song(title=title, artist=artist, genre=genre)
-    
-    # Here you should save the song to your storage system (sirope)
-    srp.save(song)
+    if request.method == "POST":
+        title = request.form.get("title")
+        artist = request.form.get("artist")
+        genre = request.form.get("genre")
+        
+        if not title:
+            flask.flash("¿Y el título?")
+            return flask.redirect(url_for("add_song"))
+        
+        if not artist:
+            flask.flash("¿Y el artista?")
+            return flask.redirect(url_for("add_song"))
+        
+        if not genre:
+            flask.flash("¿Y el género?")
+            return flask.redirect(url_for("add_song"))
+        
+        song = Song(title=title, artist=artist, genre=genre)
+        srp.save(song)
 
-    # For now, let's print the details of the song
-    print("New Song:")
-    print("Title:", song.title)
-    print("Artist:", song.artist)
-    print("Genre:", song.genre)
+        return flask.redirect(url_for("index"))
     
-    return flask.redirect("/")
+    return render_template("add_song.html")
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        if not email:
+            flask.flash("Email es requerido")
+            return flask.redirect(url_for("register"))
+        
+        if not password:
+            flask.flash("Contraseña es requerida")
+            return flask.redirect(url_for("register"))
+
+        existing_user = User.find(srp, email)
+        if existing_user:
+            flask.flash("Usuario ya registrado")
+            return flask.redirect(url_for("register"))
+
+        new_user = User(email, password)
+        srp.save(new_user)
+
+        flask.flash("Usuario registrado exitosamente. Ahora puedes iniciar sesión.")
+        return flask.redirect(url_for("index"))
+    
+    return render_template("register.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

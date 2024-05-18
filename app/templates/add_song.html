@@ -1,35 +1,28 @@
-<!-- {% extends 'base.html' %}
-
-{% block content %}
-<h2>Agregar Canción</h2>
-<form method="post">
-    {{ form.hidden_tag() }}
-    <p>{{ form.title.label }}<br>{{ form.title }}</p>
-    <p>{{ form.artist.label }}<br>{{ form.artist }}</p>
-    <p>{{ form.genre.label }}<br>{{ form.genre }}</p>
-    <p>{{ form.submit() }}</p>
-</form>
-{% endblock %} -->
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Song</title>
+    <title>My Music App - Agregar Canción</title>
 </head>
 
 <body>
-    <h1>Add Song</h1>
-    <form method="POST" action="/add_song">
-        <label for="title">Title:</label><br>
+    <h1>My Music App</h1>
+
+    <!-- Formulario para Agregar Canciones -->
+    <h2>Agregar Nueva Canción:</h2>
+    <form action="/add_song" method="POST">
+        <label for="title">Título:</label>
         <input type="text" id="title" name="title" required><br>
-        <label for="artist">Artist:</label><br>
+
+        <label for="artist">Artista:</label>
         <input type="text" id="artist" name="artist" required><br>
-        <label for="genre">Genre:</label><br>
-        <input type="text" id="genre" name="genre" required><br><br>
-        <input type="submit" value="Add Song">
+
+        <label for="genre">Género:</label>
+        <input type="text" id="genre" name="genre" required><br>
+
+        <button type="submit">Agregar Canción</button>
     </form>
 </body>
 
