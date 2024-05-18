@@ -1,3 +1,5 @@
+import sirope
+
 class FriendshipRequest:
     def __init__(self, sender, receiver):
         self.sender = sender

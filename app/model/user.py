@@ -10,6 +10,7 @@ class User(flask_login.UserMixin):
         self._songs_oids = []
         self.friends = []
         self._friend_requests = []
+        self.favorite_songs = []
 
     @property
     def email(self):

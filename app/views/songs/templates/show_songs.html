@@ -3,12 +3,46 @@
 {% block title %}My Music App - Canciones{% endblock %}
 
 {% block content %}
+<form method="POST" action="{{ url_for('songs.search_songs') }}">
+    <input type="text" name="search_query" placeholder="Buscar por término...">
+    <select name="filter_criteria">
+        <option value="all">Todos</option>
+        <option value="title">Título</option>
+        <option value="artist">Artista</option>
+        <option value="genre">Género</option>
+    </select>
+    <button type="submit">Buscar</button>
+</form>
+
+<form method="POST" action="{{ url_for('songs.show_favorites') }}">
+    <button type="submit">Mostrar Favoritos</button>
+</form>
 <h2>Canciones Disponibles:</h2>
-<ul>
-    {% for song in songs %}
-    <li>{{ song.title }} - {{ song.artist }} ({{ song.genre }})</li>
+{% if search_query %}
+<h3>Resultados de la Búsqueda para "{{ search_query }}":</h3>
+{% endif %}
+<table>
+    <tr>
+        <th>Nombre</th>
+        <th>Artista</th>
+        <th>Género</th>
+    </tr>
+    {% for song_data in songs_data %}
+    <tr>
+        <td>{{ song_data.title }}</td>
+        <td>{{ song_data.artist }}</td>
+        <td>{{ song_data.genre }}</td>
+        <td>
+            {% if usr %}
+            <form action="{{ url_for('songs.favorite_song') }}" method="POST">
+                <input type="hidden" name="song_id" value="">
+                <button type="submit">Marcar como favorita</button>
+            </form>
+            {% endif %}
+        </td>
+    </tr>
     {% endfor %}
-</ul>
+</table>
 <a href="{{ url_for('users.users') }}">Ver usuarios</a>
 <br>
 <a href="{{ url_for('account.account') }}">Mi Cuenta</a>
