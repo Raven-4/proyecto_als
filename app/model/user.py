@@ -7,6 +7,7 @@ class User(flask_login.UserMixin):
         self._email = email
         self._username = username
         self._password = safe.generate_password_hash(password)
+        self._songs_oids = []
 
     @property
     def email(self):
@@ -17,10 +18,10 @@ class User(flask_login.UserMixin):
         return self._username
     
     @property
-    def oids_messages(self):
-        if not self.__dict__.get("_messages_oids"):
-            self._messages_oids = []
-        return self._messages_oids
+    def oids_songs(self):
+        if not self.__dict__.get("_songs_oids"):
+            self._songs_oids = []
+        return self._songs_oids
 
     def get_id(self):
         return self.username
@@ -28,8 +29,8 @@ class User(flask_login.UserMixin):
     def chk_password(self, pswd):
         return safe.check_password_hash(self._password, pswd)
 
-    def add_message_oid(self, message_oid):
-        self.oids_messages.append(message_oid)
+    def add_song_oid(self, song_oid):
+        self.oids_songs.append(song_oid)
 
     @staticmethod
     def current_user():

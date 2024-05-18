@@ -5,16 +5,17 @@ import flask_login
 from flask import render_template, redirect, url_for, request
 from model.song import Song
 from model.user import User
-from model.MessageDto import MessageDto
+import views.users.users_view as user_view
 
 def create_app():
     lmanager = flask_login.LoginManager()
-    fapp = flask.Flask(__name__)
+    fapp = flask.Flask(__name__, instance_relative_config=True)
     sirp = sirope.Sirope()
 
     fapp.config.from_file("instance/config.json", load=json.load)
     lmanager.init_app(fapp)
     lmanager.login_view = 'index' 
+    fapp.register_blueprint(user_view.user_bp)
     return fapp, lmanager, sirp
 
 app, lm, srp = create_app()
@@ -71,7 +72,10 @@ def add_song():
             return flask.redirect(url_for("add_song"))
         
         song = Song(title=title, artist=artist, genre=genre)
-        srp.save(song)
+        song_oid = srp.save(song)
+
+        usr.add_song_oid(song_oid)  
+        srp.save(usr)
 
         return flask.redirect(url_for("show_songs"))
     
@@ -147,41 +151,41 @@ def register():
     
     return render_template("register.html")
 
-@app.route("/save_message", methods=["POST"])
-def save_message():
-    message_txt = flask.request.form.get("edMessage")
-    email_txt = flask.request.form.get("edEmail")
-    password_txt = flask.request.form.get("edPassword")
+# @app.route("/save_message", methods=["POST"])
+# def save_message():
+#     message_txt = flask.request.form.get("edMessage")
+#     email_txt = flask.request.form.get("edEmail")
+#     password_txt = flask.request.form.get("edPassword")
     
-    if not message_txt:
-        flask.flash("¿Y el mensaje?")
-        return flask.redirect("/")
+#     if not message_txt:
+#         flask.flash("¿Y el mensaje?")
+#         return flask.redirect("/")
     
-    if not email_txt:
-        usr = User.current_user()
-        if not usr:
-            flask.flash("¡Debes iniciar sesión primero!")
-            return flask.redirect("/")
-    else:
-        usr = User.find(srp, email_txt)
+#     if not email_txt:
+#         usr = User.current_user()
+#         if not usr:
+#             flask.flash("¡Debes iniciar sesión primero!")
+#             return flask.redirect("/")
+#     else:
+#         usr = User.find(srp, email_txt)
     
-    if not password_txt:
-        flask.flash("¿Y la contraseña?")
-        return flask.redirect("/")
+#     if not password_txt:
+#         flask.flash("¿Y la contraseña?")
+#         return flask.redirect("/")
     
-    if not usr:
-        usr = User(email_txt, password_txt)
-        srp.save(usr)
-    elif not usr.chk_password(password_txt):
-        flask.flash("Las contraseñas no coinciden")
-        return flask.redirect("/")
+#     if not usr:
+#         usr = User(email_txt, password_txt)
+#         srp.save(usr)
+#     elif not usr.chk_password(password_txt):
+#         flask.flash("Las contraseñas no coinciden")
+#         return flask.redirect("/")
     
-    flask_login.login_user(usr)
-    msg_oid = srp.save(MessageDto(f"'{usr.email} dice: {message_txt}'"))
-    usr.add_message_oid(msg_oid)
-    srp.save(usr)
+#     flask_login.login_user(usr)
+#     msg_oid = srp.save(MessageDto(f"'{usr.email} dice: {message_txt}'"))
+#     usr.add_message_oid(msg_oid)
+#     srp.save(usr)
     
-    return flask.redirect("/")
+#     return flask.redirect("/")
 
 if __name__ == "__main__":
     app.run(debug=True)
