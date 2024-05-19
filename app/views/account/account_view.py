@@ -56,8 +56,11 @@ def manage_friends():
     if current_user:
         # Consulta las solicitudes de amistad donde el usuario actual es el receptor
         friend_requests = list(srp.load_all(FriendshipRequest))
-        requests = [request for request in friend_requests if request.receiver == current_user.username]
-        return flask.render_template("friend_requests.html", friend_requests=requests)
+        requests = [request for request in friend_requests if request.receiver == current_user.username and request.status == "pending"]
+        friends = current_user.friends
+        print(friends)
+
+        return flask.render_template("friend_requests.html", friend_requests=requests, friends=friends)
     else:
         flask.flash("Debes iniciar sesión primero.")
         return flask.redirect(flask.url_for("index"))
@@ -68,12 +71,14 @@ def accept_friend_request():
     current_user = User.current_user()
     if current_user:
         request_id = flask.request.form.get("request_id")
-        friend_request = srp.load(FriendshipRequest, request_id)
+        friend_request = srp.find_first(FriendshipRequest, lambda fr: fr.id == request_id)
         if friend_request:
             # Agregar al amigo a la lista de amigos del usuario actual
             current_user.add_friend(friend_request.sender)
-            # Eliminar la solicitud de amistad
-            srp.delete(friend_request)
+            friend_request.accept()
+            srp.save(current_user)
+            srp.save(friend_request)
+            print(friend_request.status)
             flask.flash(f"Solicitud de amistad de {friend_request.sender} aceptada.")
             return flask.redirect(flask.url_for("account.manage_friends"))
         else:
@@ -88,10 +93,11 @@ def reject_friend_request():
     current_user = User.current_user()
     if current_user:
         request_id = flask.request.form.get("request_id")
-        friend_request = srp.load(FriendshipRequest, request_id)
+        friend_request = srp.find_first(FriendshipRequest, lambda fr: fr.id == request_id)
         if friend_request:
             # Eliminar la solicitud de amistad
-            srp.delete(friend_request)
+            friend_request.reject()
+            srp.save(friend_request)
             flask.flash(f"Solicitud de amistad de {friend_request.sender} rechazada.")
             return flask.redirect(flask.url_for("account.manage_friends"))
         else:

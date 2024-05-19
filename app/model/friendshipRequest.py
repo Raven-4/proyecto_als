@@ -1,11 +1,11 @@
 import sirope
 
 class FriendshipRequest:
-    def __init__(self, id, sender, receiver):
-        self.id = id
-        self.sender = sender
-        self.receiver = receiver
-        self.status = "pending"  # Por defecto, la solicitud está pendiente de aceptación
+    def __init__(self, id, sender, receiver, status):
+        self._id = id
+        self._sender = sender
+        self._receiver = receiver
+        self._status = status 
     
     @property
     def id(self):
@@ -19,8 +19,16 @@ class FriendshipRequest:
     def receiver(self):
         return self._receiver
 
+    @property
+    def status(self):
+        return self._status
+    
     def accept(self):
-        self.status = "accepted"
+        self._status = "accepted"
 
     def reject(self):
-        self.status = "rejected"
+        self._status = "rejected"
+
+    def delete_request(self):
+        sirope.Sirope.delete(self)
+

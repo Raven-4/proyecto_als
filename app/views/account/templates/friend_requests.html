@@ -6,6 +6,7 @@
 <h2>Solicitudes de Amistad Pendientes:</h2>
 <ul>
     {% for request in friend_requests %}
+    {% if request.status == 'pending' %}
     <li>{{ request.sender }} quiere ser tu amigo
         <form action="{{ url_for('account.accept_friend_request') }}" method="POST" style="display:inline;">
             <input type="hidden" name="request_id" value="{{ request.id }}">
@@ -14,6 +15,18 @@
         <form action="{{ url_for('account.reject_friend_request') }}" method="POST" style="display:inline;">
             <input type="hidden" name="request_id" value="{{ request.id }}">
             <button type="submit">Rechazar</button>
+        </form>
+    </li>
+    {% endif %}
+    {% endfor %}
+</ul>
+
+<h2>Amigos:</h2>
+<ul>
+    {% for friend in friends %}
+    <li>{{ friend }}
+        <form action="{{ url_for('songs.friend_songs', friend_username=friend)}}" method="GET" style="display:inline;">
+            <button type="submit">Acceder a canciones</button>
         </form>
     </li>
     {% endfor %}

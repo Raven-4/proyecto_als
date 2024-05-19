@@ -80,8 +80,8 @@ def add_song():
         
         song = Song(id = str(uuid.uuid4()), title=title, artist=artist, genre=genre)
 
-        song_oid = srp.save(song)
-
+        srp.save(song)
+        song_oid = song.id
         usr.add_song_oid(song_oid)  
         srp.save(usr)
 
@@ -177,3 +177,42 @@ def add_comment():
         flask.flash("Usuario no encontrado, ID de canción o comentario no proporcionado.")
 
     return flask.redirect(flask.url_for("songs.show_songs"))
+
+@song_bp.route("/friend_songs/<friend_username>")
+@flask_login.login_required
+def friend_songs(friend_username):
+    usr = User.current_user()
+    friend = User.find_by_username(srp, friend_username)
+    songs = list(srp.load_all(Song))
+
+    if usr and friend:
+        if friend.username in usr.friends:
+            # Obtener los objetos Song asociados al amigo
+            songs_data = [song for song in songs if song.id in friend._songs_oids]
+
+            songs_data = []
+            for song_oid in friend._songs_oids:
+                song = srp.find_first(Song, lambda s: s.id == song_oid)
+                if song:
+                    song_dict = {
+                        "id": song.id,
+                        "title": song.title,
+                        "artist": song.artist,
+                        "genre": song.genre,
+                        "comments": song.comments
+                    }
+                    songs_data.append(song_dict)
+            print(songs_data)
+
+            sust = {
+                "usr": usr,
+                "friend": friend,
+                "songs_data": songs_data
+            }
+            return render_template("friend_songs.html", **sust)
+        else:
+            flask.flash("No tienes permiso para ver las canciones de este usuario.")
+            return redirect(url_for("account.manage_friends"))
+    else:
+        flask.flash("Usuario o amigo no encontrado.")
+        return redirect(url_for("account.manage_friends"))
