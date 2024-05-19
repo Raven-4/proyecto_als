@@ -3,6 +3,7 @@
 import flask
 import flask_login
 import sirope
+from flask import render_template, redirect, url_for, request
 
 from model.user import User
 from model.friendshipRequest import FriendshipRequest
@@ -22,11 +23,31 @@ def account():
 @account_bp.route("/change_password", methods=["GET", "POST"])
 @flask_login.login_required
 def change_password():
-    if flask.request.method == "POST":
-        # Implementar el cambio de contraseña aquí
+    if request.method == "POST":
+        current_user = flask_login.current_user
+        current_password = request.form.get("current_password")
+        new_password = request.form.get("new_password")
+        confirm_password = request.form.get("confirm_password")
+
+        if not current_password or not new_password or not confirm_password:
+            flask.flash("Por favor, complete todos los campos.")
+            return redirect(url_for("account.change_password"))
+
+        if not current_user.chk_password(current_password):
+            flask.flash("La contraseña actual no es correcta.")
+            return redirect(url_for("account.change_password"))
+
+        if new_password != confirm_password:
+            flask.flash("Las contraseñas nuevas no coinciden.")
+            return redirect(url_for("account.change_password"))
+
+        current_user.set_password(new_password)
+        srp.save(current_user)
+
         flask.flash("Contraseña cambiada exitosamente.")
-        return flask.redirect(flask.url_for("account.account"))
-    return flask.render_template("change_password.html")
+        return redirect(url_for("account.account"))
+
+    return render_template("change_password.html")
 
 @account_bp.route("/manage_friends")
 @flask_login.login_required

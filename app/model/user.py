@@ -69,3 +69,6 @@ class User(flask_login.UserMixin):
     @staticmethod
     def find_by_username(s: sirope.Sirope, username: str) -> "User":
         return s.find_first(User, lambda u: u.username == username)
+
+    def set_password(self, new_password):
+        self._password = safe.generate_password_hash(new_password)
