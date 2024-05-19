@@ -3,6 +3,7 @@
 import flask
 import flask_login
 import sirope
+import uuid
 
 from model.user import User
 from model.friendshipRequest import FriendshipRequest
@@ -45,7 +46,7 @@ def add_friend(username):
                 flask.flash("Ya has enviado una solicitud de amistad a este usuario.")
                 print(f"Ya has enviado una solicitud de amistad a {friend.username}.")
             else:
-                new_request = FriendshipRequest(sender=current_user.username, receiver=friend.username)
+                new_request = FriendshipRequest(id = str(uuid.uuid4()), sender=current_user.username, receiver=friend.username)
                 srp.save(new_request)
                 flask.flash(f"Solicitud de amistad enviada a {friend.username}")
     return flask.redirect(flask.url_for("users.users"))

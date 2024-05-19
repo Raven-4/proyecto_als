@@ -54,42 +54,48 @@ def change_password():
 def manage_friends():
     current_user = User.current_user()
     if current_user:
-        friend_requests = current_user.friend_requests
-        return flask.render_template("friend_requests.html", friend_requests=friend_requests)
+        # Consulta las solicitudes de amistad donde el usuario actual es el receptor
+        friend_requests = list(srp.load_all(FriendshipRequest))
+        requests = [request for request in friend_requests if request.receiver == current_user.username]
+        return flask.render_template("friend_requests.html", friend_requests=requests)
     else:
         flask.flash("Debes iniciar sesión primero.")
         return flask.redirect(flask.url_for("index"))
 
-@account_bp.route("/accept_friend_request/<int:request_id>", methods=["POST"])
+@account_bp.route("/accept_friend_request", methods=["POST"])
 @flask_login.login_required
-def accept_friend_request(request_id):
+def accept_friend_request():
     current_user = User.current_user()
     if current_user:
-        friend_request = FriendshipRequest.query.get(request_id)
+        request_id = flask.request.form.get("request_id")
+        friend_request = srp.load(FriendshipRequest, request_id)
         if friend_request:
-            current_user.accept_friend_request(friend_request)
-            flask.flash(f"Solicitud de amistad de {friend_request.sender.username} aceptada.")
+            # Agregar al amigo a la lista de amigos del usuario actual
+            current_user.add_friend(friend_request.sender)
+            # Eliminar la solicitud de amistad
+            srp.delete(friend_request)
+            flask.flash(f"Solicitud de amistad de {friend_request.sender} aceptada.")
             return flask.redirect(flask.url_for("account.manage_friends"))
         else:
             flask.flash("Solicitud de amistad no encontrada.")
-            return flask.redirect(flask.url_for("account.manage_friends"))
     else:
         flask.flash("Debes iniciar sesión primero.")
-        return flask.redirect(flask.url_for("index"))
+    return flask.redirect(flask.url_for("index"))
 
-@account_bp.route("/reject_friend_request/<int:request_id>", methods=["POST"])
+@account_bp.route("/reject_friend_request", methods=["POST"])
 @flask_login.login_required
-def reject_friend_request(request_id):
+def reject_friend_request():
     current_user = User.current_user()
     if current_user:
-        friend_request = FriendshipRequest.query.get(request_id)
+        request_id = flask.request.form.get("request_id")
+        friend_request = srp.load(FriendshipRequest, request_id)
         if friend_request:
-            current_user.reject_friend_request(friend_request)
-            flask.flash(f"Solicitud de amistad de {friend_request.sender.username} rechazada.")
+            # Eliminar la solicitud de amistad
+            srp.delete(friend_request)
+            flask.flash(f"Solicitud de amistad de {friend_request.sender} rechazada.")
             return flask.redirect(flask.url_for("account.manage_friends"))
         else:
             flask.flash("Solicitud de amistad no encontrada.")
-            return flask.redirect(flask.url_for("account.manage_friends"))
     else:
         flask.flash("Debes iniciar sesión primero.")
-        return flask.redirect(flask.url_for("index"))
+    return flask.redirect(flask.url_for("index"))
