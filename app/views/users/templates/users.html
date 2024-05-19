@@ -7,9 +7,11 @@
 <ul>
     {% for user in users %}
     <li>{{ user.username }} - {{ user.email }}
+        {% if user.username != current_user.username %}
         <form action="{{ url_for('users.add_friend', username=user.username) }}" method="POST" style="display:inline;">
             <button type="submit">Enviar Solicitud de Amistad</button>
         </form>
+        {% endif %}
     </li>
     {% endfor %}
 </ul>

@@ -7,6 +7,6 @@
 <!-- Aquí puedes mostrar la información de la cuenta del usuario -->
 <p>Nombre de usuario: {{ current_user.username }}</p>
 <p>Email: {{ current_user.email }}</p>
-<a href="{{ url_for('account.change_password') }}">Cambiar Contraseña</a>
+<a href="{{ url_for('account.change_password') }}">Cambiar Contraseña</a> <br>
 <a href="{{ url_for('account.manage_friends') }}">Administrar Amistades</a>
 {% endblock %}

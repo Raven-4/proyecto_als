@@ -33,24 +33,22 @@ def search_users():
         return flask.render_template("search_users.html", users=users, search_query=search_query)
     return flask.render_template("search_users.html")
 
-# @user_bp.route("/add_friend/<username>", methods=["POST"])
-# @flask_login.login_required
-# def add_friend(username):
-#     srp = sirope.Sirope()
-#     current_user = User.current_user()
-#     if current_user:
-#         friend = User.find_by_username(srp, username)
-#         if friend:
-#             # Verificar si ya hay una solicitud de amistad pendiente entre los usuarios
-#             existing_request = FriendshipRequest.query.filter_by(sender=current_user, receiver=friend).first()
-#             if existing_request:
-#                 flask.flash("Ya has enviado una solicitud de amistad a este usuario.")
-#             else:
-#                 # Crear una nueva solicitud de amistad
-#                 new_request = FriendshipRequest(sender=current_user, receiver=friend)
-#                 srp.save(new_request)
-#                 flask.flash(f"Solicitud de amistad enviada a {friend.username}")
-#     return flask.redirect(flask.url_for("users.users"))
+@user_bp.route("/add_friend/<username>", methods=["POST"])
+@flask_login.login_required
+def add_friend(username):
+    current_user = User.current_user()
+    if current_user:
+        friend = srp.find_first(User, lambda u: u.username == username)
+        if friend:
+            existing_request = srp.find_first(FriendshipRequest, lambda fr: fr.sender == current_user.username and fr.receiver == friend.username)
+            if existing_request:
+                flask.flash("Ya has enviado una solicitud de amistad a este usuario.")
+                print(f"Ya has enviado una solicitud de amistad a {friend.username}.")
+            else:
+                new_request = FriendshipRequest(sender=current_user.username, receiver=friend.username)
+                srp.save(new_request)
+                flask.flash(f"Solicitud de amistad enviada a {friend.username}")
+    return flask.redirect(flask.url_for("users.users"))
 
 # @user_bp.route("/friend_requests")
 # @flask_login.login_required
