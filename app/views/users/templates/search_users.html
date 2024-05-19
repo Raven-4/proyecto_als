@@ -3,21 +3,19 @@
 {% block title %}My Music App - Buscar Usuarios{% endblock %}
 
 {% block content %}
-<h2>Resultados de la Búsqueda:</h2>
+<h2 class="my-4">Resultados de la Búsqueda:</h2>
 {% if search_query %}
 <p>Resultados para "{{ search_query }}":</p>
 {% endif %}
-<ul>
+<ul class="list-group mb-4">
     {% for user in users %}
-    <li>{{ user.username }} - {{ user.email }}
-        <form action="{{ url_for('users.add_friend', username=user.username) }}" method="POST" style="display:inline;">
-            <button type="submit">Enviar Solicitud de Amistad</button>
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ user.username }} - {{ user.email }}
+        <form action="{{ url_for('users.add_friend', username=user.username) }}" method="POST" class="d-inline">
+            <button type="submit" class="btn btn-primary btn-sm">Enviar Solicitud de Amistad</button>
         </form>
     </li>
     {% endfor %}
 </ul>
-<a href="{{ url_for('users.users') }}">
-    <button>Atrás</button>
-</a>
-
+<a href="javascript:void(0);" onclick="goBack();" class="btn btn-secondary mt-3">Atrás</a>
 {% endblock %}

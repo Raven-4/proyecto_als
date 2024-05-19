@@ -1,0 +1,23 @@
+{% extends "esqueleto.html" %}
+
+{% block title %}My Music App - Agregar Canción{% endblock %}
+
+{% block content %}
+<h2>Agregar Nueva Canción:</h2>
+<form action="/songs/add_song" method="POST">
+    <label for="title">Título:</label>
+    <input type="text" id="title" name="title" required><br>
+
+    <label for="artist">Artista:</label>
+    <input type="text" id="artist" name="artist" required><br>
+
+    <label for="genre">Género:</label>
+    <input type="text" id="genre" name="genre" required><br>
+
+    <button type="submit">Agregar Canción</button>
+</form>
+<a href="{{ url_for('songs.show_songs') }}">
+    <button>Atrás</button>
+</a>
+
+{% endblock %}

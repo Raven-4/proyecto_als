@@ -1,73 +1,68 @@
 {% extends "esqueleto.html" %}
 
-{% block title %}My Music App - Canciones{% endblock %}
-
 {% block content %}
-<form method="POST" action="{{ url_for('songs.search_songs') }}">
-    <input type="text" name="search_query" placeholder="{{ 'Buscar en favoritos' if showing_favorites else 'Buscar' }}">
-    <select name="filter_criteria">
-        <option value="all">Todos</option>
-        <option value="title">Título</option>
-        <option value="artist">Artista</option>
-        <option value="genre">Género</option>
-    </select>
-    <button type="submit">Buscar</button>
-</form>
+<div class="my-3">
+    <form method="POST" action="{{ url_for('songs.search_songs') }}" class="form-inline mb-3">
+        <input type="text" name="search_query" class="form-control mr-2" placeholder="{{ 'Buscar en favoritos' if showing_favorites else 'Buscar' }}">
+        <select name="filter_criteria" class="form-control mr-2">
+            <option value="all">Todos</option>
+            <option value="title">Título</option>
+            <option value="artist">Artista</option>
+            <option value="genre">Género</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Buscar</button>
+    </form>
 
-<form method="POST" action="{{ url_for('songs.toggle_view') }}">
-    <button type="submit">{{ 'Mostrar Todos' if showing_favorites else 'Mostrar Favoritos' }}</button>
-</form>
+    <form method="POST" action="{{ url_for('songs.toggle_view') }}">
+        <button type="submit" class="btn btn-secondary">{{ 'Mostrar Todos' if showing_favorites else 'Mostrar Favoritos' }}</button>
+    </form>
+</div>
 
 <h2>{{ 'Favoritos' if showing_favorites else 'Canciones Disponibles' }}:</h2>
 {% if search_query %}
 <h3>Resultados de la Búsqueda para "{{ search_query }}":</h3>
 {% endif %}
-<table>
-    <tr>
-        <th>Nombre</th>
-        <th>Artista</th>
-        <th>Género</th>
-        <th>Comentarios</th>
-    </tr>
-    {% for song_data in songs_data %}
-    <tr>
-        <td>{{ song_data.title }}</td>
-        <td>{{ song_data.artist }}</td>
-        <td>{{ song_data.genre }}</td>
-        <td>
-            {% for comment in song_data.comments %}
-            <p><strong>{{ comment.user }}</strong>: {{ comment.comment }}</p>
-            {% endfor %}
-        </td>
-        <td>
-            {% if usr %}
-            <form action="{{ url_for('songs.add_comment') }}" method="POST">
-                <input type="hidden" name="song_id" value="{{ song_data.id }}">
-                <input type="text" name="comment" placeholder="Añadir comentario">
-                <button type="submit">Comentar</button>
-            </form>
-            {% endif %}
-        </td>
-        <td>
-            {% if usr %}
-            <form action="{{ url_for('songs.toggle_favorite') }}" method="POST">
-                <input type="hidden" name="song_id" value="{{ song_data.id }}">
-                {% if song_data.id in usr.favorite_songs_ids %}
-                <button type="submit">Desmarcar como favorita</button>
-                {% else %}
-                <button type="submit">Marcar como favorita</button>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Artista</th>
+            <th>Género</th>
+            <th>Comentarios</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for song_data in songs_data %}
+        <tr>
+            <td>{{ song_data.title }}</td>
+            <td>{{ song_data.artist }}</td>
+            <td>{{ song_data.genre }}</td>
+            <td>
+                {% for comment in song_data.comments %}
+                <p><strong>{{ comment.user }}</strong>: {{ comment.comment }}</p>
+                {% endfor %}
+            </td>
+            <td>
+                {% if usr %}
+                <form action="{{ url_for('songs.add_comment') }}" method="POST" class="mb-2">
+                    <input type="hidden" name="song_id" value="{{ song_data.id }}">
+                    <input type="text" name="comment" class="form-control" placeholder="Añadir comentario">
+                    <button type="submit" class="btn btn-sm btn-primary mt-2">Comentar</button>
+                </form>
+                <form action="{{ url_for('songs.toggle_favorite') }}" method="POST">
+                    <input type="hidden" name="song_id" value="{{ song_data.id }}">
+                    <button type="submit" class="btn btn-sm {{ 'btn-danger' if song_data.id in usr.favorite_songs_ids else 'btn-success' }}">
+                        {{ 'Desmarcar como favorita' if song_data.id in usr.favorite_songs_ids else 'Marcar como favorita' }}
+                    </button>
+                </form>
                 {% endif %}
-            </form>
-            {% endif %}
-        </td>
-    </tr>
-    {% endfor %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
 </table>
-<a href="{{ url_for('users.users') }}">Ver usuarios</a>
-<br>
-<a href="{{ url_for('account.account') }}">Mi Cuenta</a>
-<br>
-<a href="{{ url_for('songs.add_song') }}">
-    <button>Añadir Canciones</button>
-</a>
+<!-- <a href="{{ url_for('users.users') }}" class="btn btn-link">Ver usuarios</a> -->
+<!-- <a href="{{ url_for('account.account') }}" class="btn btn-link">Mi Cuenta</a> -->
+<a href="{{ url_for('songs.add_song') }}" class="btn btn-primary">Añadir Canciones</a>
 {% endblock %}

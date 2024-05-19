@@ -5,19 +5,19 @@
 {% block content %}
 <h2>Agregar Nueva Canción:</h2>
 <form action="/songs/add_song" method="POST">
-    <label for="title">Título:</label>
-    <input type="text" id="title" name="title" required><br>
-
-    <label for="artist">Artista:</label>
-    <input type="text" id="artist" name="artist" required><br>
-
-    <label for="genre">Género:</label>
-    <input type="text" id="genre" name="genre" required><br>
-
-    <button type="submit">Agregar Canción</button>
+    <div class="form-group">
+        <label for="title">Título:</label>
+        <input type="text" class="form-control" id="title" name="title" required>
+    </div>
+    <div class="form-group">
+        <label for="artist">Artista:</label>
+        <input type="text" class="form-control" id="artist" name="artist" required>
+    </div>
+    <div class="form-group">
+        <label for="genre">Género:</label>
+        <input type="text" class="form-control" id="genre" name="genre" required>
+    </div>
+    <button type="submit" class="btn btn-primary">Agregar Canción</button>
 </form>
-<a href="{{ url_for('songs.show_songs') }}">
-    <button>Atrás</button>
-</a>
-
+<a href="javascript:void(0);" onclick="goBack();" class="btn btn-secondary mt-3">Atrás</a>
 {% endblock %}

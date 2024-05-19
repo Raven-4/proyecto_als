@@ -5,19 +5,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}My Music App{% endblock %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 
 <body>
-    <!-- <h1>My Music App</h1> -->
+    <div class="container mt-4">
+        {% if usr %}
+        <div class="d-flex justify-content-between mb-3">
+            <div class="align-self-center">
+                <p class="mr-3">User: {{ usr.username }}</p>
+            </div>
+            <div class="align-self-center">
+                <a href="{{ url_for('account.account') }}" class="btn btn-primary btn-sm mr-2">Mi Cuenta</a>
+                <a href="{{ url_for('users.users') }}" class="btn btn-primary btn-sm mr-2">Ver Usuarios</a>
+                <form action="/logout" method="POST" class="d-inline">
+                    <button type="submit" class="btn btn-danger btn-sm">Cerrar Sesión</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
 
-    {% if usr %}
-    <p>Bienvenido, {{ usr.username }}!</p>
-    <form action="/logout" method="POST">
-        <button type="submit">Cerrar Sesión</button>
-    </form> <br>
-    {% endif %}
-
-    {% block content %}{% endblock %}
+        {% block content %}{% endblock %}
+    </div>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function goBack() {
+            window.history.back();
+        }
+    </script>
 </body>
 
 </html>

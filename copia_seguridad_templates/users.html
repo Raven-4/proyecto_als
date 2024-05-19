@@ -1,0 +1,29 @@
+{% extends "esqueleto.html" %}
+
+{% block title %}My Music App - Usuarios{% endblock %}
+
+{% block content %}
+<h2>Usuarios Registrados:</h2>
+<ul>
+    {% for user in users %}
+    <li>{{ user.username }} - {{ user.email }}
+        {% if user.username != current_user.username %}
+        <form action="{{ url_for('users.add_friend', username=user.username) }}" method="POST" style="display:inline;">
+            <button type="submit">Enviar Solicitud de Amistad</button>
+        </form>
+        {% endif %}
+    </li>
+    {% endfor %}
+</ul>
+
+<h2>Buscar Usuarios:</h2>
+<form action="{{ url_for('users.search_users') }}" method="POST">
+    <label for="search_query">Nombre de Usuario:</label>
+    <input type="text" id="search_query" name="search_query" required><br>
+    <button type="submit">Buscar</button>
+</form>
+<a href="{{ url_for('account.account') }}">
+    <button>Atrás</button>
+</a>
+
+{% endblock %}

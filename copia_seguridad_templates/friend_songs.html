@@ -1,0 +1,31 @@
+{% extends "esqueleto.html" %}
+
+{% block title %}Canciones de {{ friend.username }}{% endblock %}
+
+{% block content %}
+<h2>Canciones de {{ friend.username }}:</h2>
+<table>
+    <tr>
+        <th>Nombre</th>
+        <th>Artista</th>
+        <th>Género</th>
+        <th>Comentarios</th>
+    </tr>
+    {% for song in songs_data %}
+    <tr>
+        <td>{{ song.title }}</td>
+        <td>{{ song.artist }}</td>
+        <td>{{ song.genre }}</td>
+        <td>
+            {% for comment in song.comments %}
+            <p><strong>{{ comment.user }}</strong>: {{ comment.comment }}</p>
+            {% endfor %}
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+<a href="{{ url_for('account.manage_friends') }}">
+    <button>Atrás</button>
+</a>
+
+{% endblock %}

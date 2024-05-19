@@ -3,36 +3,37 @@
 {% block title %}My Music App - Solicitudes de Amistad{% endblock %}
 
 {% block content %}
-<h2>Solicitudes de Amistad Pendientes:</h2>
-<ul>
+<h2 class="my-4">Solicitudes de Amistad Pendientes:</h2>
+<ul class="list-group mb-4">
     {% for request in friend_requests %}
     {% if request.status == 'pending' %}
-    <li>{{ request.sender }} quiere ser tu amigo
-        <form action="{{ url_for('account.accept_friend_request') }}" method="POST" style="display:inline;">
-            <input type="hidden" name="request_id" value="{{ request.id }}">
-            <button type="submit">Aceptar</button>
-        </form>
-        <form action="{{ url_for('account.reject_friend_request') }}" method="POST" style="display:inline;">
-            <input type="hidden" name="request_id" value="{{ request.id }}">
-            <button type="submit">Rechazar</button>
-        </form>
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ request.sender }} quiere ser tu amigo
+        <div>
+            <form action="{{ url_for('account.accept_friend_request') }}" method="POST" class="d-inline">
+                <input type="hidden" name="request_id" value="{{ request.id }}">
+                <button type="submit" class="btn btn-success btn-sm">Aceptar</button>
+            </form>
+            <form action="{{ url_for('account.reject_friend_request') }}" method="POST" class="d-inline">
+                <input type="hidden" name="request_id" value="{{ request.id }}">
+                <button type="submit" class="btn btn-danger btn-sm">Rechazar</button>
+            </form>
+        </div>
     </li>
     {% endif %}
     {% endfor %}
 </ul>
 
-<h2>Amigos:</h2>
-<ul>
+<h2 class="my-4">Amigos:</h2>
+<ul class="list-group">
     {% for friend in friends %}
-    <li>{{ friend }}
-        <form action="{{ url_for('songs.friend_songs', friend_username=friend)}}" method="GET" style="display:inline;">
-            <button type="submit">Acceder a canciones</button>
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ friend }}
+        <form action="{{ url_for('songs.friend_songs', friend_username=friend) }}" method="GET" class="d-inline">
+            <button type="submit" class="btn btn-primary btn-sm">Acceder a canciones</button>
         </form>
     </li>
     {% endfor %}
 </ul>
-<a href="{{ url_for('account.account') }}">
-    <button>Atrás</button>
-</a>
-
+<a href="javascript:void(0);" onclick="goBack();" class="btn btn-secondary mt-3">Atrás</a>
 {% endblock %}

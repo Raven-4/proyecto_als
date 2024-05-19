@@ -1,0 +1,23 @@
+ <!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Music App</title>
+</head>
+
+<body>
+    <!-- <h1>My Music App</h1> -->
+
+    {% if usr %}
+    <p>Bienvenido, {{ usr.username }}!</p>
+    <form action="/logout" method="POST">
+        <button type="submit">Cerrar Sesión</button>
+    </form> <br>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</body>
+
+</html>
