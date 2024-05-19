@@ -10,7 +10,7 @@ class User(flask_login.UserMixin):
         self._songs_oids = []
         self.friends = []
         self._friend_requests = []
-        self.favorite_songs = []
+        self.favorite_songs_ids  = []
 
     @property
     def email(self):
@@ -43,6 +43,14 @@ class User(flask_login.UserMixin):
 
     def add_friend_request(self, friend_request):
         self._friend_requests.append(friend_request)
+
+    def add_favorite_song(self, song_id):
+        if song_id not in self.favorite_songs_ids:
+            self.favorite_songs_ids.append(song_id)
+
+    def remove_favorite_song(self, song_id):
+        if song_id in self.favorite_songs_ids:
+            self.favorite_songs_ids.remove(song_id)
 
     @staticmethod
     def current_user():

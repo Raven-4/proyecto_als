@@ -1,24 +1,21 @@
 import sirope
 
 class Song:
-    def __init__(self, identificador, title, artist, genre):
-        self._identificador = identificador
+    def __init__(self, id, title, artist, genre, comments=None):
+        self._id = id
         self._title = title
         self._artist = artist
         self._genre = genre
+        self.comments = comments if comments else []
 
-
-    # @id.setter
-    # def id(self, value):
-    #     self._id = value
+    @property
+    def id(self):
+        return self._id
 
     @property
     def title(self):
         return self._title
-    @property
-    def identificador(self):
-        return self._identificador
-   
+       
     @property
     def artist(self):
         return self._artist
@@ -26,6 +23,12 @@ class Song:
     @property
     def genre(self):
         return self._genre
+
+    def add_comment(self, user, comment):
+        self.comments.append({"user": user, "comment": comment})
+
+    def get_comments(self):
+        return self.comments
 
     @staticmethod
     def find(s: sirope.Sirope, title: str) -> "Song":

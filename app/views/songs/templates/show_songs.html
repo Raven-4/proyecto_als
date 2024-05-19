@@ -4,7 +4,7 @@
 
 {% block content %}
 <form method="POST" action="{{ url_for('songs.search_songs') }}">
-    <input type="text" name="search_query" placeholder="Buscar por término...">
+    <input type="text" name="search_query" placeholder="{{ 'Buscar en favoritos' if showing_favorites else 'Buscar' }}">
     <select name="filter_criteria">
         <option value="all">Todos</option>
         <option value="title">Título</option>
@@ -14,10 +14,11 @@
     <button type="submit">Buscar</button>
 </form>
 
-<form method="POST" action="{{ url_for('songs.show_favorites') }}">
-    <button type="submit">Mostrar Favoritos</button>
+<form method="POST" action="{{ url_for('songs.toggle_view') }}">
+    <button type="submit">{{ 'Mostrar Todos' if showing_favorites else 'Mostrar Favoritos' }}</button>
 </form>
-<h2>Canciones Disponibles:</h2>
+
+<h2>{{ 'Favoritos' if showing_favorites else 'Canciones Disponibles' }}:</h2>
 {% if search_query %}
 <h3>Resultados de la Búsqueda para "{{ search_query }}":</h3>
 {% endif %}
@@ -26,6 +27,7 @@
         <th>Nombre</th>
         <th>Artista</th>
         <th>Género</th>
+        <th>Comentarios</th>
     </tr>
     {% for song_data in songs_data %}
     <tr>
@@ -33,10 +35,28 @@
         <td>{{ song_data.artist }}</td>
         <td>{{ song_data.genre }}</td>
         <td>
+            {% for comment in song_data.comments %}
+            <p><strong>{{ comment.user }}</strong>: {{ comment.comment }}</p>
+            {% endfor %}
+        </td>
+        <td>
             {% if usr %}
-            <form action="{{ url_for('songs.favorite_song') }}" method="POST">
-                <input type="hidden" name="song_id" value="">
+            <form action="{{ url_for('songs.add_comment') }}" method="POST">
+                <input type="hidden" name="song_id" value="{{ song_data.id }}">
+                <input type="text" name="comment" placeholder="Añadir comentario">
+                <button type="submit">Comentar</button>
+            </form>
+            {% endif %}
+        </td>
+        <td>
+            {% if usr %}
+            <form action="{{ url_for('songs.toggle_favorite') }}" method="POST">
+                <input type="hidden" name="song_id" value="{{ song_data.id }}">
+                {% if song_data.id in usr.favorite_songs_ids %}
+                <button type="submit">Desmarcar como favorita</button>
+                {% else %}
                 <button type="submit">Marcar como favorita</button>
+                {% endif %}
             </form>
             {% endif %}
         </td>

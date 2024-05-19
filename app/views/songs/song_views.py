@@ -6,7 +6,6 @@ import uuid
 
 from model.song import Song
 from model.user import User
-from model.favoriteSong import FavoriteSong
 
 def get_song_blueprint():
     song_bp = flask.Blueprint('songs', __name__, url_prefix="/songs", template_folder="templates", static_folder="static")
@@ -15,26 +14,44 @@ def get_song_blueprint():
 
 song_bp, srp = get_song_blueprint()
 
+@song_bp.route("/toggle_view", methods=["POST"])
+@flask_login.login_required
+def toggle_view():
+    usr = User.current_user()
+    session = flask.session
+
+    # Alterna el estado de la vista
+    showing_favorites = session.get('showing_favorites', False)
+    session['showing_favorites'] = not showing_favorites
+
+    return flask.redirect(flask.url_for("songs.show_songs"))
+
 @song_bp.route("/show_songs", methods=["GET", "POST"])
 @flask_login.login_required
 def show_songs():
     usr = User.current_user()
     songs = list(srp.load_all(Song))
+    showing_favorites = flask.session.get('showing_favorites', False)
+
+    if showing_favorites:
+        songs = [song for song in songs if song.id in usr.favorite_songs_ids]
 
     songs_data = []
     for song in songs:
         song_dict = {
-            "id": song.identificador,
+            "id": song.id,
             "title": song.title,
             "artist": song.artist,
-            "genre": song.genre
+            "genre": song.genre,
+            "comments": song.comments
         }
         songs_data.append(song_dict)
 
     print(songs_data)
     sust = {
         "usr": usr,
-        "songs_data": songs_data
+        "songs_data": songs_data,
+        "showing_favorites": showing_favorites
     }
 
     return render_template("show_songs.html", **sust)
@@ -76,59 +93,87 @@ def add_song():
 @flask_login.login_required
 def search_songs():
     usr = User.current_user()
+    showing_favorites = flask.session.get('showing_favorites', False)
+    
     if request.method == "POST":
         search_query = request.form.get("search_query")
         filter_criteria = request.form.get("filter_criteria")
         
+        # Cargar las canciones de acuerdo al estado de favoritos
+        if showing_favorites:
+            songs = [song for song in srp.load_all(Song) if song.id in usr.favorite_songs_ids]
+        else:
+            songs = list(srp.load_all(Song))
+        
+        # Filtrar las canciones según la búsqueda
         if filter_criteria == "all":
-            filtered_songs = [song for song in srp.load_all(Song) if 
+            filtered_songs = [song for song in songs if 
                               search_query.lower() in song.title.lower() 
                               or search_query.lower() in song.artist.lower() 
                               or search_query.lower() in song.genre.lower()]
         else:
-            filtered_songs = [song for song in srp.load_all(Song) if 
+            filtered_songs = [song for song in songs if 
                               search_query.lower() in getattr(song, filter_criteria).lower()]
+
+        filtered_songs_data = [
+            {
+                "id": song.id,
+                "title": song.title,
+                "artist": song.artist,
+                "genre": song.genre
+            } for song in filtered_songs
+        ]
 
         sust = {
             "usr": usr,
-            "songs": filtered_songs,
-            "search_query": search_query
+            "songs_data": filtered_songs_data,
+            "search_query": search_query,
+            "showing_favorites": showing_favorites
         }
         return render_template("show_songs.html", **sust)
     return redirect(url_for("songs.show_songs"))
 
-@song_bp.route("/favorite_song", methods=["POST"])
+@song_bp.route("/toggle_favorite", methods=["POST"])
 @flask_login.login_required
-def favorite_song():
+def toggle_favorite():
     usr = User.current_user()
-    song_id = request.form.get("song_id")  # Obtener el ID de la canción desde el formulario
+    song_id = request.form.get("song_id")
     songs = list(srp.load_all(Song))
 
     if usr and song_id is not None:
-        song = next((song for song in songs if song.id == song_id), None)
-
-        if song:
-            favorite = FavoriteSong(username=usr.username, song_data=song)
-            srp.save(favorite)
-            flask.flash(f"{song.title} marcada como favorita.")
+        if song_id in usr.favorite_songs_ids:
+            usr.remove_favorite_song(song_id)
+            flask.flash("Canción desmarcada como favorita.")
         else:
-            flask.flash("Canción no encontrada.")
+            song = next((song for song in songs if song.id == song_id), None)
+            if song:
+                usr.add_favorite_song(song_id)
+                flask.flash(f"{song.title} marcada como favorita.")
+            else:
+                flask.flash("Canción no encontrada.")
+        
+        srp.save(usr)
     else:
         flask.flash("Usuario no encontrado o ID de canción no proporcionado.")
 
     return flask.redirect(flask.url_for("songs.show_songs"))
 
-@song_bp.route("/show_favorites", methods=["POST"])
+@song_bp.route("/add_comment", methods=["POST"])
 @flask_login.login_required
-def show_favorites():
+def add_comment():
     usr = User.current_user()
-    if usr:
-        favorite_songs = [favorite.song_data for favorite in usr.favorite_songs]
-        sust = {
-            "usr": usr,
-            "songs_data": favorite_songs
-        }
-        return render_template("show_songs.html", **sust)
+    song_id = request.form.get("song_id")
+    comment_text = request.form.get("comment")
+
+    if usr and song_id and comment_text:
+        song = srp.find_first(Song, lambda s: s.id == song_id)
+        if song:
+            song.add_comment(usr.username, comment_text)
+            srp.save(song)
+            flask.flash("Comentario añadido correctamente.")
+        else:
+            flask.flash("Canción no encontrada.")
     else:
-        flask.flash("Debes iniciar sesión para ver tus favoritos.")
-        return redirect(url_for("index"))
+        flask.flash("Usuario no encontrado, ID de canción o comentario no proporcionado.")
+
+    return flask.redirect(flask.url_for("songs.show_songs"))
