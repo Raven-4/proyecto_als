@@ -21,18 +21,21 @@ user_bp, srp = get_user_blueprint()
 def users():
     srp = sirope.Sirope()
     users = list(srp.load_all(User))
-    return flask.render_template("users.html", users=users)
+    usr = User.current_user()
+    return flask.render_template("users.html", users=users, usr=usr)
 
 @user_bp.route("/search", methods=["GET", "POST"])
 @flask_login.login_required
 def search_users():
     srp = sirope.Sirope()
+    usr = User.current_user()
+
     if flask.request.method == "POST":
         search_query = flask.request.form.get("search_query")
         all_users = list(srp.load_all(User))
         users = [user for user in all_users if search_query.lower() in user.username.lower()]
-        return flask.render_template("search_users.html", users=users, search_query=search_query)
-    return flask.render_template("search_users.html")
+        return flask.render_template("search_users.html", users=users, search_query=search_query, usr=usr)
+    return flask.render_template("search_users.html" ,usr=usr)
 
 @user_bp.route("/add_friend/<username>", methods=["POST"])
 @flask_login.login_required

@@ -18,11 +18,13 @@ account_bp, srp = get_account_blueprint()
 @account_bp.route("/")
 @flask_login.login_required
 def account():
-    return flask.render_template("account.html")
+    usr = User.current_user()
+    return flask.render_template("account.html", usr=usr)
 
 @account_bp.route("/change_password", methods=["GET", "POST"])
 @flask_login.login_required
 def change_password():
+    usr = User.current_user()
     if request.method == "POST":
         current_user = flask_login.current_user
         current_password = request.form.get("current_password")
@@ -47,7 +49,7 @@ def change_password():
         flask.flash("Contraseña cambiada exitosamente.")
         return redirect(url_for("account.account"))
 
-    return render_template("change_password.html")
+    return render_template("change_password.html", usr=usr)
 
 @account_bp.route("/manage_friends")
 @flask_login.login_required
@@ -60,7 +62,7 @@ def manage_friends():
         friends = current_user.friends
         print(friends)
 
-        return flask.render_template("friend_requests.html", friend_requests=requests, friends=friends)
+        return flask.render_template("friend_requests.html", friend_requests=requests, friends=friends, usr = current_user)
     else:
         flask.flash("Debes iniciar sesión primero.")
         return flask.redirect(flask.url_for("index"))

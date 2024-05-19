@@ -10,12 +10,9 @@
 <body>
     <h1>My Music App</h1>
 
-    <!-- Formulario de Inicio de Sesión -->
     {% if not usr %}
     <h2>Iniciar Sesión:</h2>
     <form action="/login" method="POST">
-        <!-- <label for="email">Email:</label>
-        <input type="email" id="email" name="email" required><br> -->
 
         <label for="username">Nombre de Usuario:</label>
         <input type="text" id="username" name="username" required><br>

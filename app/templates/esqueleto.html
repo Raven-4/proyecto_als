@@ -8,14 +8,13 @@
 </head>
 
 <body>
-    <h1>My Music App</h1>
+    <!-- <h1>My Music App</h1> -->
 
-    <!-- Mostrar el nombre de usuario y el botón de logout -->
     {% if usr %}
     <p>Bienvenido, {{ usr.username }}!</p>
     <form action="/logout" method="POST">
         <button type="submit">Cerrar Sesión</button>
-    </form>
+    </form> <br>
     {% endif %}
 
     {% block content %}{% endblock %}
