@@ -9,9 +9,16 @@ class User(flask_login.UserMixin):
         self._password = safe.generate_password_hash(password)
         self._songs_oids = []
         self.friends = []
-        self._friend_requests = []
         self.favorite_songs_ids  = []
 
+    @property
+    def password(self):
+        return self._password
+    
+    @property
+    def favorite_songs(self):
+        return self.favorite_songs_ids
+    
     @property
     def email(self):
         return self._email
@@ -25,9 +32,6 @@ class User(flask_login.UserMixin):
         if not self.__dict__.get("_songs_oids"):
             self._songs_oids = []
         return self._songs_oids
-
-    def friend_requests(self):
-        return self._friend_requests
 
     def get_id(self):
         return self.username

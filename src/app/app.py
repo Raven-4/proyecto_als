@@ -4,7 +4,6 @@ import sirope
 import flask_login
 from flask import render_template, redirect, url_for, request
 
-from model.song import Song
 from model.user import User
 import views.users.users_view as user_view
 import views.songs.song_views as song_view

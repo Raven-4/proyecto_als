@@ -17,10 +17,8 @@ song_bp, srp = get_song_blueprint()
 @song_bp.route("/toggle_view", methods=["POST"])
 @flask_login.login_required
 def toggle_view():
-    usr = User.current_user()
     session = flask.session
 
-    # Alterna el estado de la vista
     showing_favorites = session.get('showing_favorites', False)
     session['showing_favorites'] = not showing_favorites
 
@@ -47,7 +45,6 @@ def show_songs():
         }
         songs_data.append(song_dict)
 
-    print(songs_data)
     sust = {
         "usr": usr,
         "songs_data": songs_data,
@@ -99,13 +96,11 @@ def search_songs():
         search_query = request.form.get("search_query")
         filter_criteria = request.form.get("filter_criteria")
         
-        # Cargar las canciones de acuerdo al estado de favoritos
         if showing_favorites:
             songs = [song for song in srp.load_all(Song) if song.id in usr.favorite_songs_ids]
         else:
             songs = list(srp.load_all(Song))
         
-        # Filtrar las canciones según la búsqueda
         if filter_criteria == "all":
             filtered_songs = [song for song in songs if 
                               search_query.lower() in song.title.lower() 
@@ -131,6 +126,7 @@ def search_songs():
             "showing_favorites": showing_favorites
         }
         return render_template("show_songs.html", **sust)
+    
     return redirect(url_for("songs.show_songs"))
 
 @song_bp.route("/toggle_favorite", methods=["POST"])
@@ -140,12 +136,13 @@ def toggle_favorite():
     song_id = request.form.get("song_id")
     songs = list(srp.load_all(Song))
 
-    if usr and song_id is not None:
+    if song_id is not None:
         if song_id in usr.favorite_songs_ids:
             usr.remove_favorite_song(song_id)
             flask.flash("Canción desmarcada como favorita.")
         else:
             song = next((song for song in songs if song.id == song_id), None)
+
             if song:
                 usr.add_favorite_song(song_id)
                 flask.flash(f"{song.title} marcada como favorita.")
@@ -154,7 +151,7 @@ def toggle_favorite():
         
         srp.save(usr)
     else:
-        flask.flash("Usuario no encontrado o ID de canción no proporcionado.")
+        flask.flash("ID de canción no proporcionado.")
 
     return flask.redirect(flask.url_for("songs.show_songs"))
 
@@ -165,8 +162,9 @@ def add_comment():
     song_id = request.form.get("song_id")
     comment_text = request.form.get("comment")
 
-    if usr and song_id and comment_text:
+    if song_id and comment_text:
         song = srp.find_first(Song, lambda s: s.id == song_id)
+
         if song:
             song.add_comment(usr.username, comment_text)
             srp.save(song)
@@ -174,7 +172,7 @@ def add_comment():
         else:
             flask.flash("Canción no encontrada.")
     else:
-        flask.flash("Usuario no encontrado, ID de canción o comentario no proporcionado.")
+        flask.flash("ID de canción o comentario no proporcionado.")
 
     return flask.redirect(flask.url_for("songs.show_songs"))
 
@@ -185,34 +183,29 @@ def friend_songs(friend_username):
     friend = User.find_by_username(srp, friend_username)
     songs = list(srp.load_all(Song))
 
-    if usr and friend:
-        if friend.username in usr.friends:
-            # Obtener los objetos Song asociados al amigo
-            songs_data = [song for song in songs if song.id in friend._songs_oids]
+    if friend.username in usr.friends:
+        songs_data = [song for song in songs if song.id in friend._songs_oids]
 
-            songs_data = []
-            for song_oid in friend._songs_oids:
-                song = srp.find_first(Song, lambda s: s.id == song_oid)
-                if song:
-                    song_dict = {
-                        "id": song.id,
-                        "title": song.title,
-                        "artist": song.artist,
-                        "genre": song.genre,
-                        "comments": song.comments
-                    }
-                    songs_data.append(song_dict)
-            print(songs_data)
+        songs_data = []
+        for song_oid in friend._songs_oids:
+            song = srp.find_first(Song, lambda s: s.id == song_oid)
+            if song:
+                song_dict = {
+                    "id": song.id,
+                    "title": song.title,
+                    "artist": song.artist,
+                    "genre": song.genre,
+                    "comments": song.comments
+                }
+                songs_data.append(song_dict)
+        print(songs_data)
 
-            sust = {
-                "usr": usr,
-                "friend": friend,
-                "songs_data": songs_data
-            }
-            return render_template("friend_songs.html", **sust)
-        else:
-            flask.flash("No tienes permiso para ver las canciones de este usuario.")
-            return redirect(url_for("account.manage_friends"))
+        sust = {
+            "usr": usr,
+            "friend": friend,
+            "songs_data": songs_data
+        }
+        return render_template("friend_songs.html", **sust)
     else:
-        flask.flash("Usuario o amigo no encontrado.")
+        flask.flash("Amigo no encontrado.")
         return redirect(url_for("account.manage_friends"))
